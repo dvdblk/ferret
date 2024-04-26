@@ -82,12 +82,6 @@ def model_tokenizer_ner():
     return model, tokenizer
 
 
-@pytest.fixture
-def model_tokenizer_zero_shot():
-    model =  AutoModelForSequenceClassification.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
-    tokenizer = AutoTokenizer.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
-    return model, tokenizer
-
 # ================================================================
 # =  Fixture for all fixtures (initialization of the benchmarks) =
 # ================================================================
