@@ -86,16 +86,17 @@ def remove_word(audio, word, removal_type: str = "nothing"):
 
     if removal_type == "nothing":
         replace_word_audio = AudioSegment.empty()
+
     elif removal_type == "silence":
         replace_word_audio = AudioSegment.silent(duration=word_duration)
 
     elif removal_type == "white noise":
-        sound_path = (os.path.join(os.path.dirname(__file__), "white_noise.mp3"),)
+        sound_path = os.path.join(os.path.dirname(__file__), "white_noise.mp3")
+
         replace_word_audio = AudioSegment.from_mp3(sound_path)[:word_duration]
 
-        # display(audio_removed)
     elif removal_type == "pink noise":
-        sound_path = (os.path.join(os.path.dirname(__file__), "pink_noise.mp3"),)
+        sound_path = os.path.join(os.path.dirname(__file__), "pink_noise.mp3")
         replace_word_audio = AudioSegment.from_mp3(sound_path)[:word_duration]
 
     audio_removed = before_word_audio + replace_word_audio + after_word_audio
