@@ -28,7 +28,7 @@ class FerretAudio:
 
         if isinstance(audio_path_or_array, str):
             self.array, self.current_sr = librosa.load(
-                audio_path_or_array, sr=None, dtype=np.float32
+                audio_path_or_array, sr=None, dtype=np.float32, mono=True
             )
         elif isinstance(audio_path_or_array, np.ndarray):
             if current_sr is None:
@@ -65,8 +65,8 @@ class FerretAudio:
         Resample the audio to the target sampling rate. In place operation.
         """
         self.array = librosa.resample(
-            self.array, orig_sr=self.current_sr, target_sr=target_sr
-        )
+            self.array.ravel(), orig_sr=self.current_sr, target_sr=target_sr
+        ).reshape(-1, 1)
         self.current_sr = target_sr
 
     @staticmethod
