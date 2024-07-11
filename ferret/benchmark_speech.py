@@ -121,8 +121,6 @@ class SpeechBenchmark:
         if audio.current_sr != 16_000:
             audio.resample(16_000)  # this is required by WhisperX
 
-        print(audio.current_sr)
-
         transcription_output = self._transcribe(
             audio=audio.normalized_array,
             language=self.language,

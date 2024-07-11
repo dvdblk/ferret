@@ -57,6 +57,11 @@ def remove_word(audio, word, removal_type: str = "nothing"):
     - white noise
     - pink noise
 
+    WARNING: if `word["start"] * 1000 - a` is negative, the audio is actually
+             traversed FROM SOME POINT UNTIL ITS END (like `l[-10:]`
+             actually takes the last 10 entries of the list `l`). Therefore if
+             the difference is negative, we effectively use `a=0`.
+
     Args:
         audio (pydub.AudioSegment): audio
         word: word to remove with its start and end times
@@ -65,9 +70,19 @@ def remove_word(audio, word, removal_type: str = "nothing"):
 
     a, b = 100, 40
 
-    before_word_audio = audio[: word["start"] * 1000 - a]
-    after_word_audio = audio[word["end"] * 1000 + b :]
-    word_duration = (word["end"] * 1000 - word["start"] * 1000) + a + b
+    # Convert from seconds (as returned by WhisperX) to milliseconds (as
+    # required to index PyDub `AudioSegment` objects).
+    word_start_ms = word["start"] * 1000
+    word_end_ms = word["end"] * 1000
+
+    # If we risk reading the audio segment from the end (difference is
+    # negative) set the offset `a` to zero to avoid that.
+    if word_start_ms - a < 0:
+        a = 0
+
+    before_word_audio = audio[:word_start_ms - a]
+    after_word_audio = audio[word_end_ms + b :]
+    word_duration = (word_end_ms - word_start_ms) + a + b
 
     if removal_type == "nothing":
         replace_word_audio = AudioSegment.empty()
