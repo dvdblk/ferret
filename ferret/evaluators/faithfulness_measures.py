@@ -1,4 +1,5 @@
 import copy
+import torch
 from typing import List
 
 import numpy as np
@@ -59,7 +60,12 @@ class AOPC_Comprehensiveness_Evaluation(BaseEvaluator):
         baseline = logits.softmax(-1)[0, target].item()
 
         # Tokenized sentence
-        item = self.helper._tokenize(text)
+        item = self.helper._tokenize(text, add_special_tokens=False)
+        assert item["input_ids"].shape[1] == len(explanation.tokens), (
+            item["input_ids"].shape[1],
+            len(explanation.tokens),
+        )
+
 
         # Get token ids of the sentence
         input_len = item["attention_mask"].sum().item()
@@ -123,6 +129,8 @@ class AOPC_Comprehensiveness_Evaluation(BaseEvaluator):
 
         # Prediction probability for the target
         _, logits = self.helper._forward(discrete_expl_ths, output_hidden_states=False)
+        if logits.dtype == torch.bfloat16:
+            logits = logits.float()
         probs_removing = logits.softmax(-1)[:, target].cpu().numpy()
 
         # compute probability difference
@@ -171,7 +179,11 @@ class AOPC_Sufficiency_Evaluation(BaseEvaluator):
         baseline = logits.softmax(-1)[0, target].item()
 
         # Tokenized sentence
-        item = self.helper._tokenize(text)
+        item = self.helper._tokenize(text, add_special_tokens=False)
+        assert item["input_ids"].shape[1] == len(explanation.tokens), (
+            item["input_ids"].shape[1],
+            len(explanation.tokens),
+        )
         # Get token ids of the sentence
         input_len = item["attention_mask"].sum().item()
         input_ids = item["input_ids"][0][:input_len].tolist()
@@ -239,6 +251,8 @@ class AOPC_Sufficiency_Evaluation(BaseEvaluator):
 
         # Prediction probability for the target
         _, logits = self.helper._forward(discrete_expl_ths, output_hidden_states=False)
+        if logits.dtype == torch.bfloat16:
+            logits = logits.float()
         probs_removing = logits.softmax(-1)[:, target].cpu().numpy()
 
         # Compute probability difference
@@ -264,7 +278,7 @@ class TauLOO_Evaluation(BaseEvaluator):
         _, logits = self.helper._forward(text, output_hidden_states=False)
         baseline = logits.softmax(-1)[0, target].item()
 
-        item = self.helper._tokenize(text)
+        item = self.helper._tokenize(text, add_special_tokens=False)
         input_len = item["attention_mask"].sum().item()
         input_ids = item["input_ids"][0][:input_len].tolist()
         if remove_first_last == True:
@@ -278,6 +292,8 @@ class TauLOO_Evaluation(BaseEvaluator):
             samples.append(sample)
 
         _, logits = self.helper._forward(samples, output_hidden_states=False)
+        if logits.dtype == torch.bfloat16:
+            logits = logits.float()
         leave_one_out_removal = logits.softmax(-1)[:, target].cpu()
 
         occlusion_importance = leave_one_out_removal - baseline
