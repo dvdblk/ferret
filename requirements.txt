@@ -13,3 +13,4 @@ opencv-python
 lime
 joblib
 pytreebank
+thinc==8.2.1
