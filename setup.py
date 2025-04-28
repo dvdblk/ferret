@@ -27,6 +27,7 @@ requirements = [
     "joblib",
     "pytreebank",
     "thermostat-datasets",
+    "thinc==8.2.1"
 ]
 
 test_requirements = []
